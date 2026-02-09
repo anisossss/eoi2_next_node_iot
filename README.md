@@ -1,6 +1,7 @@
 # CSIR IoT Weather Dashboard
 
 ## Expression of Interest (EOI) No. 8121/10/02/2026
+
 ### The Provision or Supply of Software Development Services to the CSIR
 
 ---
@@ -37,6 +38,7 @@ A comprehensive, professional web application demonstrating modern software deve
 ## Features
 
 ### Frontend (Single Page Application)
+
 - **Modern, Responsive UI**: Professional design optimized for desktop, tablet, and mobile
 - **Grid View**: Visual dashboard with weather data and IoT sensor readings
 - **Interactive Tree View**: Hierarchical data representation with expandable nodes
@@ -44,6 +46,7 @@ A comprehensive, professional web application demonstrating modern software deve
 - **Dark Mode Support**: Automatic theme switching based on system preferences
 
 ### Backend
+
 - **RESTful API**: Full CRUD operations with proper HTTP methods
 - **JWT Authentication**: Secure token-based authentication
 - **Role-Based Access Control**: Admin, User, and Viewer roles
@@ -52,12 +55,14 @@ A comprehensive, professional web application demonstrating modern software deve
 - **CORS Support**: Cross-origin request handling
 
 ### IoT Integration
+
 - **MQTT Protocol**: Industry-standard IoT communication
 - **Real-time Data**: WebSocket broadcasting of sensor data
 - **Data Simulation**: Realistic IoT sensor data generation
 - **Multiple Sensor Types**: Temperature, humidity, pressure, wind
 
 ### Data Persistence
+
 - **MongoDB**: Document-based database for flexible data storage
 - **Optimized Schemas**: Indexed collections for performance
 - **Data Validation**: Schema-level validation rules
@@ -66,16 +71,16 @@ A comprehensive, professional web application demonstrating modern software deve
 
 ## Technical Stack
 
-| Component | Technology |
-|-----------|------------|
-| **Frontend** | Next.js 14, React 18, TypeScript, Tailwind CSS |
-| **Backend** | Node.js, Express.js, TypeScript |
-| **Database** | MongoDB 7.0 |
-| **Message Broker** | Eclipse Mosquitto (MQTT) |
-| **Real-time** | Socket.IO, WebSockets |
-| **Containerization** | Docker, Docker Compose |
-| **Testing** | Jest, React Testing Library, Supertest |
-| **External API** | Open-Meteo Weather API |
+| Component            | Technology                                     |
+| -------------------- | ---------------------------------------------- |
+| **Frontend**         | Next.js 14, React 18, TypeScript, Tailwind CSS |
+| **Backend**          | Node.js, Express.js, TypeScript                |
+| **Database**         | MongoDB 7.0                                    |
+| **Message Broker**   | Eclipse Mosquitto (MQTT)                       |
+| **Real-time**        | Socket.IO, WebSockets                          |
+| **Containerization** | Docker, Docker Compose                         |
+| **Testing**          | Jest, React Testing Library, Supertest         |
+| **External API**     | Open-Meteo Weather API                         |
 
 ---
 
@@ -146,12 +151,14 @@ EIOO2/
 ### Local Development
 
 **1. Clone the repository:**
+
 ```bash
 git clone <repository-url>
 cd EIOO2
 ```
 
 **2. Install dependencies:**
+
 ```bash
 # Backend
 cd backend
@@ -167,6 +174,7 @@ npm install
 ```
 
 **3. Start MongoDB and MQTT broker:**
+
 ```bash
 # Using Docker
 docker run -d -p 27017:27017 --name mongodb mongo:7.0
@@ -174,6 +182,7 @@ docker run -d -p 1883:1883 -p 9001:9001 --name mosquitto eclipse-mosquitto:2.0
 ```
 
 **4. Run the applications:**
+
 ```bash
 # Terminal 1 - Backend
 cd backend
@@ -189,6 +198,7 @@ npm run dev
 ```
 
 **5. Access the application:**
+
 - Frontend: http://localhost:3000
 - Backend API: http://localhost:3001/api
 - API Health: http://localhost:3001/api/health
@@ -200,6 +210,7 @@ npm run dev
 ### Using Docker Compose (Recommended)
 
 **1. Build and start all services:**
+
 ```bash
 docker-compose up --build
 ```
@@ -213,6 +224,7 @@ docker-compose up --build
 | MQTT Broker | localhost:1883 (TCP), localhost:9001 (WebSocket) |
 
 **3. Stop all services:**
+
 ```bash
 docker-compose down
 ```
@@ -245,6 +257,7 @@ docker push <your-dockerhub-username>/csir-iot-backend:latest
 ```
 
 **Pull Commands:**
+
 ```bash
 docker pull <your-dockerhub-username>/csir-iot-frontend:latest
 docker pull <your-dockerhub-username>/csir-iot-backend:latest
@@ -255,6 +268,7 @@ docker pull <your-dockerhub-username>/csir-iot-backend:latest
 ## API Documentation
 
 ### Base URL
+
 ```
 http://localhost:3001/api
 ```
@@ -262,60 +276,67 @@ http://localhost:3001/api
 ### Endpoints
 
 #### Health Check
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| GET | `/health` | Basic health check |
-| GET | `/health/detailed` | Detailed service status |
-| GET | `/health/ready` | Kubernetes readiness probe |
-| GET | `/health/live` | Kubernetes liveness probe |
+
+| Method | Endpoint           | Description                |
+| ------ | ------------------ | -------------------------- |
+| GET    | `/health`          | Basic health check         |
+| GET    | `/health/detailed` | Detailed service status    |
+| GET    | `/health/ready`    | Kubernetes readiness probe |
+| GET    | `/health/live`     | Kubernetes liveness probe  |
 
 #### Weather
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| GET | `/weather/current` | Get current weather from Open-Meteo API |
-| GET | `/weather/history` | Get historical weather data |
-| GET | `/weather/latest` | Get latest weather readings |
-| GET | `/weather/statistics` | Get weather statistics |
-| GET | `/weather/codes` | Get weather code descriptions |
+
+| Method | Endpoint              | Description                             |
+| ------ | --------------------- | --------------------------------------- |
+| GET    | `/weather/current`    | Get current weather from Open-Meteo API |
+| GET    | `/weather/history`    | Get historical weather data             |
+| GET    | `/weather/latest`     | Get latest weather readings             |
+| GET    | `/weather/statistics` | Get weather statistics                  |
+| GET    | `/weather/codes`      | Get weather code descriptions           |
 
 #### Sensors
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| GET | `/sensors` | List all sensors |
-| GET | `/sensors/:sensorId` | Get sensor details |
-| POST | `/sensors` | Create new sensor (Admin) |
-| PUT | `/sensors/:sensorId` | Update sensor (Admin) |
-| DELETE | `/sensors/:sensorId` | Delete sensor (Admin) |
-| GET | `/sensors/:sensorId/readings` | Get sensor readings |
+
+| Method | Endpoint                      | Description               |
+| ------ | ----------------------------- | ------------------------- |
+| GET    | `/sensors`                    | List all sensors          |
+| GET    | `/sensors/:sensorId`          | Get sensor details        |
+| POST   | `/sensors`                    | Create new sensor (Admin) |
+| PUT    | `/sensors/:sensorId`          | Update sensor (Admin)     |
+| DELETE | `/sensors/:sensorId`          | Delete sensor (Admin)     |
+| GET    | `/sensors/:sensorId/readings` | Get sensor readings       |
 
 #### IoT
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| GET | `/iot/readings` | Get all IoT readings |
-| GET | `/iot/readings/latest` | Get latest readings per sensor |
-| POST | `/iot/readings` | Submit new reading |
-| POST | `/iot/simulate` | Trigger simulated data |
-| GET | `/iot/status` | Get IoT system status |
-| GET | `/iot/tree` | Get data in tree structure |
+
+| Method | Endpoint               | Description                    |
+| ------ | ---------------------- | ------------------------------ |
+| GET    | `/iot/readings`        | Get all IoT readings           |
+| GET    | `/iot/readings/latest` | Get latest readings per sensor |
+| POST   | `/iot/readings`        | Submit new reading             |
+| POST   | `/iot/simulate`        | Trigger simulated data         |
+| GET    | `/iot/status`          | Get IoT system status          |
+| GET    | `/iot/tree`            | Get data in tree structure     |
 
 #### Authentication
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| POST | `/auth/register` | Register new user |
-| POST | `/auth/login` | Login and get tokens |
-| GET | `/auth/me` | Get current user profile |
-| PUT | `/auth/profile` | Update profile |
-| PUT | `/auth/password` | Change password |
-| POST | `/auth/logout` | Logout |
+
+| Method | Endpoint         | Description              |
+| ------ | ---------------- | ------------------------ |
+| POST   | `/auth/register` | Register new user        |
+| POST   | `/auth/login`    | Login and get tokens     |
+| GET    | `/auth/me`       | Get current user profile |
+| PUT    | `/auth/profile`  | Update profile           |
+| PUT    | `/auth/password` | Change password          |
+| POST   | `/auth/logout`   | Logout                   |
 
 ### Example API Requests
 
 **Get Current Weather:**
+
 ```bash
 curl http://localhost:3001/api/weather/current
 ```
 
 **Response:**
+
 ```json
 {
   "success": true,
@@ -393,6 +414,7 @@ curl http://localhost:3001/api/weather/current
 ### Running Tests
 
 **Backend Tests:**
+
 ```bash
 cd backend
 npm test                 # Run all tests
@@ -400,6 +422,7 @@ npm run test:coverage    # Run with coverage report
 ```
 
 **Frontend Tests:**
+
 ```bash
 cd frontend
 npm test                 # Run all tests
@@ -409,6 +432,7 @@ npm run test:coverage    # Run with coverage report
 ### Test Coverage
 
 The project includes tests for:
+
 - API endpoint functionality
 - Service layer business logic
 - React component rendering
@@ -423,12 +447,12 @@ The IoT Simulator generates realistic sensor data to demonstrate the system's re
 
 ### Simulated Sensors
 
-| Sensor ID | Location | Type | Measurements |
-|-----------|----------|------|--------------|
-| SENSOR-PRETORIA-001 | CSIR Main Campus | Combined | Temp, Humidity, Pressure, Wind |
-| SENSOR-PRETORIA-002 | Research Lab A | Temperature | Temp, Humidity |
-| SENSOR-CPT-001 | Cape Town Office | Combined | Temp, Humidity, Pressure, Wind |
-| SENSOR-DBN-001 | Durban Facility | Humidity | Temp, Humidity |
+| Sensor ID           | Location         | Type        | Measurements                   |
+| ------------------- | ---------------- | ----------- | ------------------------------ |
+| SENSOR-PRETORIA-001 | CSIR Main Campus | Combined    | Temp, Humidity, Pressure, Wind |
+| SENSOR-PRETORIA-002 | Research Lab A   | Temperature | Temp, Humidity                 |
+| SENSOR-CPT-001      | Cape Town Office | Combined    | Temp, Humidity, Pressure, Wind |
+| SENSOR-DBN-001      | Durban Facility  | Humidity    | Temp, Humidity                 |
 
 ### Data Characteristics
 
@@ -442,6 +466,7 @@ The IoT Simulator generates realistic sensor data to demonstrate the system's re
 ## Environment Variables
 
 ### Backend
+
 ```env
 NODE_ENV=production
 PORT=3001
@@ -452,12 +477,14 @@ CORS_ORIGIN=http://localhost:3000
 ```
 
 ### Frontend
+
 ```env
 NEXT_PUBLIC_API_URL=http://localhost:3001/api
 NEXT_PUBLIC_WS_URL=ws://localhost:3001
 ```
 
 ### IoT Simulator
+
 ```env
 MQTT_BROKER_URL=mqtt://localhost:1883
 SIMULATION_INTERVAL=5000
@@ -480,14 +507,6 @@ SIMULATION_INTERVAL=5000
 ## License
 
 This project is developed for CSIR EOI No. 8121/10/02/2026 submission.
-
----
-
-## Contact
-
-For inquiries regarding this EOI submission:
-- Email: tender@csir.co.za
-- Subject: EOI No. 8121/10/02/2026
 
 ---
 
