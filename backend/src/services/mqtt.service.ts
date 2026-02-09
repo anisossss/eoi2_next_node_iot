@@ -20,23 +20,35 @@ let mqttClient: MqttClient | null = null;
 
 /**
  * Initialize MQTT client and connect to broker
+ * Returns null if MQTT broker is not available (optional dependency)
  */
-export async function initializeMQTT(): Promise<MqttClient> {
-  return new Promise((resolve, reject) => {
+export async function initializeMQTT(): Promise<MqttClient | null> {
+  return new Promise((resolve) => {
     const brokerUrl = process.env.MQTT_BROKER_URL || 'mqtt://localhost:1883';
     
     const options: IClientOptions = {
       clientId: `csir-backend-${Date.now()}`,
       clean: true,
       connectTimeout: 4000,
-      reconnectPeriod: 5000,
+      reconnectPeriod: 0, // Disable auto-reconnect for initial connection
       keepalive: 60
     };
 
     logger.info(`Connecting to MQTT broker at ${brokerUrl}`);
     mqttClient = mqtt.connect(brokerUrl, options);
 
+    // Set a timeout for the connection attempt
+    const connectionTimeout = setTimeout(() => {
+      logger.warn('MQTT broker not available - continuing without MQTT support');
+      if (mqttClient) {
+        mqttClient.end(true);
+        mqttClient = null;
+      }
+      resolve(null);
+    }, 5000);
+
     mqttClient.on('connect', () => {
+      clearTimeout(connectionTimeout);
       logger.info('Connected to MQTT broker');
       
       // Subscribe to topics
@@ -60,10 +72,13 @@ export async function initializeMQTT(): Promise<MqttClient> {
     mqttClient.on('message', handleMQTTMessage);
 
     mqttClient.on('error', (error) => {
-      logger.error('MQTT error:', error);
-      if (!mqttClient?.connected) {
-        reject(error);
+      clearTimeout(connectionTimeout);
+      logger.warn('MQTT error (broker may not be running):', error.message || error);
+      if (mqttClient) {
+        mqttClient.end(true);
+        mqttClient = null;
       }
+      resolve(null);
     });
 
     mqttClient.on('close', () => {

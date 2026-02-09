@@ -119,9 +119,13 @@ async function startServer(): Promise<void> {
     await connectDatabase();
     logger.info('✅ Connected to MongoDB');
 
-    // Initialize MQTT client
-    await initializeMQTT();
-    logger.info('✅ MQTT client initialized');
+    // Initialize MQTT client (optional - will continue without if broker not available)
+    const mqttClient = await initializeMQTT();
+    if (mqttClient) {
+      logger.info('✅ MQTT client initialized');
+    } else {
+      logger.warn('⚠️ MQTT broker not available - running without MQTT support');
+    }
 
     // Initialize WebSocket server
     initializeWebSocket(httpServer);
