@@ -27,6 +27,12 @@ COPY . .
 ENV NEXT_TELEMETRY_DISABLED=1
 ENV NODE_ENV=production
 
+# Accept NEXT_PUBLIC_* as build arguments so they get baked into the Next.js build
+ARG NEXT_PUBLIC_API_URL=http://localhost:3001/api
+ARG NEXT_PUBLIC_WS_URL=ws://localhost:3001
+ENV NEXT_PUBLIC_API_URL=$NEXT_PUBLIC_API_URL
+ENV NEXT_PUBLIC_WS_URL=$NEXT_PUBLIC_WS_URL
+
 # Build the application
 RUN npm run build
 
