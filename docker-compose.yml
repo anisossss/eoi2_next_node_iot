@@ -7,7 +7,7 @@ services:
     container_name: csir-mongodb
     restart: unless-stopped
     ports:
-      - "27017:27017"
+      - "27018:27017"
     environment:
       MONGO_INITDB_ROOT_USERNAME: csir_admin
       MONGO_INITDB_ROOT_PASSWORD: csir_secure_password_2026
