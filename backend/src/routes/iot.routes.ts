@@ -8,7 +8,7 @@ import { asyncHandler, APIError } from '../middleware/error.middleware';
 import { optionalAuth } from '../middleware/auth.middleware';
 import { validateIoTReading, validatePagination } from '../middleware/validation.middleware';
 import { IoTReading, Sensor } from '../models';
-import { publishMessage, MQTT_TOPICS } from '../services/mqtt.service';
+import { publishMessage } from '../services/mqtt.service';
 import { broadcastToClients, getConnectedClientsCount } from '../services/websocket.service';
 
 const router = Router();

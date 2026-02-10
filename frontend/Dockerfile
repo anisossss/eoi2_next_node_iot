@@ -48,7 +48,7 @@ ENV PORT=3000
 ENV HOSTNAME="0.0.0.0"
 
 # Copy built application
-COPY --from=builder /app/public ./public
+RUN mkdir -p ./public
 COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
 COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
 
