@@ -44,6 +44,8 @@ interface AppState {
   // Connection state
   isConnected: boolean;
   setConnected: (connected: boolean) => void;
+  connectionStatus: 'idle' | 'connecting' | 'connected' | 'reconnecting' | 'disconnected';
+  setConnectionStatus: (status: 'idle' | 'connecting' | 'connected' | 'reconnecting' | 'disconnected') => void;
   lastUpdateTime: Date | null;
   setLastUpdateTime: (time: Date | null) => void;
   
@@ -69,6 +71,7 @@ const initialState = {
   latestReadings: [],
   treeData: null,
   isConnected: false,
+  connectionStatus: 'idle' as const,
   lastUpdateTime: null,
   isLoading: false,
   error: null,
@@ -134,6 +137,10 @@ export const useStore = create<AppState>((set, get) => ({
   
   // Connection actions
   setConnected: (connected) => set({ isConnected: connected }),
+  setConnectionStatus: (status) => set({
+    connectionStatus: status,
+    isConnected: status === 'connected',
+  }),
   setLastUpdateTime: (time) => set({ lastUpdateTime: time }),
   
   // UI actions

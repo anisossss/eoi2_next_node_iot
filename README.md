@@ -229,40 +229,6 @@ docker-compose up --build
 docker-compose down
 ```
 
-### Individual Docker Builds
-
-```bash
-# Build backend
-cd backend
-docker build -t csir-iot-backend .
-
-# Build frontend
-cd frontend
-docker build -t csir-iot-frontend .
-
-# Build simulator
-cd iot-simulator
-docker build -t csir-iot-simulator .
-```
-
-### Docker Hub Deployment
-
-```bash
-# Tag and push images
-docker tag csir-iot-frontend <your-dockerhub-username>/csir-iot-frontend:latest
-docker push <your-dockerhub-username>/csir-iot-frontend:latest
-
-docker tag csir-iot-backend <your-dockerhub-username>/csir-iot-backend:latest
-docker push <your-dockerhub-username>/csir-iot-backend:latest
-```
-
-**Pull Commands:**
-
-```bash
-docker pull <your-dockerhub-username>/csir-iot-frontend:latest
-docker pull <your-dockerhub-username>/csir-iot-backend:latest
-```
-
 ---
 
 ## API Documentation
@@ -472,7 +438,7 @@ NODE_ENV=production
 PORT=3001
 MONGODB_URI=mongodb://localhost:27017/csir_iot_db
 MQTT_BROKER_URL=mqtt://localhost:1883
-JWT_SECRET=your-secure-secret-key
+JWT_SECRET=secure-secret-key
 CORS_ORIGIN=http://localhost:3000
 ```
 

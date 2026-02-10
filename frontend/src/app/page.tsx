@@ -18,7 +18,7 @@ export default function Home() {
     setSensors,
     setLatestReadings,
     setTreeData,
-    setConnected,
+    setConnectionStatus,
     addReading,
     isLoading,
     setLoading,
@@ -67,56 +67,64 @@ export default function Home() {
     setIsRefreshing(false);
   }, [fetchData]);
 
-  // Setup WebSocket connection
+  // WebSocket: connection status + real-time events (graceful when WS fails)
   useEffect(() => {
+    const unsub = wsService.onConnectionStatus((status) => {
+      setConnectionStatus(status);
+    });
+
     const setupWebSocket = async () => {
-      try {
-        await wsService.connect();
-        setConnected(true);
+      await wsService.connect();
 
-        // Subscribe to all updates
-        wsService.subscribeAll();
+      wsService.subscribeAll();
 
-        // Handle IoT reading events
-        wsService.on<IoTReadingEvent>('iot:reading', (data) => {
-          setIsUpdating(true);
-          addReading(data);
-          setTimeout(() => setIsUpdating(false), 1000);
+      wsService.on<IoTReadingEvent>('iot:reading', (data) => {
+        setIsUpdating(true);
+        addReading(data);
+        setTimeout(() => setIsUpdating(false), 1000);
+      });
+
+      wsService.on<WeatherUpdateEvent>('weather:update', (data) => {
+        setIsUpdating(true);
+        const prev = useStore.getState().currentWeather;
+        setCurrentWeather({
+          latitude: prev?.latitude ?? -25.75,
+          longitude: prev?.longitude ?? 28.19,
+          temperature: data.temperature,
+          windspeed: data.windspeed,
+          winddirection: data.winddirection,
+          weathercode: data.weathercode,
+          is_day: data.is_day,
+          timestamp: data.timestamp,
+          timezone: prev?.timezone ?? 'Africa/Johannesburg',
+          timezone_abbreviation: prev?.timezone_abbreviation ?? 'SAST',
+          elevation: prev?.elevation ?? 1395,
+          weather_description: data.weather_description ?? '',
         });
-
-        // Handle weather updates
-        wsService.on<WeatherUpdateEvent>('weather:update', (data) => {
-          setIsUpdating(true);
-          // Update weather if needed
-          setTimeout(() => setIsUpdating(false), 1000);
-        });
-
-      } catch (err) {
-        console.error('WebSocket connection failed:', err);
-        setConnected(false);
-      }
+        setTimeout(() => setIsUpdating(false), 1000);
+      });
     };
 
     setupWebSocket();
 
     return () => {
+      unsub();
       wsService.disconnect();
     };
-  }, [setConnected, addReading]);
+  }, [setConnectionStatus, addReading, setCurrentWeather]);
 
   // Initial data fetch
   useEffect(() => {
     fetchData();
   }, [fetchData]);
 
-  // Periodic refresh (every 60 seconds)
+  // Dynamic polling: more frequent when WebSocket disconnected so data still feels live
+  const connectionStatus = useStore((s) => s.connectionStatus);
   useEffect(() => {
-    const interval = setInterval(() => {
-      fetchData();
-    }, 60000);
-
+    const ms = connectionStatus === 'connected' ? 60000 : 15000;
+    const interval = setInterval(fetchData, ms);
     return () => clearInterval(interval);
-  }, [fetchData]);
+  }, [fetchData, connectionStatus]);
 
   // Simulate IoT data for demo (every 10 seconds)
   useEffect(() => {
@@ -142,10 +150,10 @@ export default function Home() {
   }, []);
 
   return (
-    <div className="min-h-screen">
+    <div className="min-h-screen relative z-10">
       <Header onRefresh={handleRefresh} isRefreshing={isRefreshing} />
 
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 relative">
         {/* Error State */}
         {error && (
           <div className="mb-6 p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg flex items-center justify-between">

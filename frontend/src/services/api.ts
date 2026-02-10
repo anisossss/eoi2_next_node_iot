@@ -16,10 +16,35 @@ import type {
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001/api';
 
+/** Retry on 502/503/gateway errors; return null on final failure for graceful fallback */
+async function withRetry<T>(
+  fn: () => Promise<T>,
+  options: { retries?: number; delayMs?: number } = {}
+): Promise<T | null> {
+  const { retries = 3, delayMs = 2000 } = options;
+  let lastError: unknown;
+  for (let i = 0; i <= retries; i++) {
+    try {
+      return await fn();
+    } catch (e) {
+      lastError = e;
+      const status = (e as AxiosError)?.response?.status;
+      const isRetryable = status === 502 || status === 503 || status === 504 || (e as AxiosError)?.code === 'ECONNABORTED';
+      if (i < retries && isRetryable) {
+        await new Promise((r) => setTimeout(r, delayMs * (i + 1)));
+      } else {
+        break;
+      }
+    }
+  }
+  if (lastError) console.warn('API request failed after retries:', lastError);
+  return null;
+}
+
 // Create axios instance with default configuration
 const apiClient: AxiosInstance = axios.create({
   baseURL: API_BASE_URL,
-  timeout: 15000,
+  timeout: 20000,
   headers: {
     'Content-Type': 'application/json',
   },
@@ -57,17 +82,19 @@ apiClient.interceptors.response.use(
 
 export const weatherAPI = {
   /**
-   * Get current weather from Open-Meteo API
+   * Get current weather from API (dynamic). Returns null on 502/503/timeout so UI can show connecting + poll.
    */
   async getCurrentWeather(
     latitude: number = -25.75,
     longitude: number = 28.19
-  ): Promise<CurrentWeather> {
-    const response = await apiClient.get<APIResponse<CurrentWeather>>(
-      '/weather/current',
-      { params: { latitude, longitude } }
-    );
-    return response.data.data;
+  ): Promise<CurrentWeather | null> {
+    return withRetry(async () => {
+      const response = await apiClient.get<APIResponse<CurrentWeather>>(
+        '/weather/current',
+        { params: { latitude, longitude } }
+      );
+      return response.data.data;
+    });
   },
 
   /**

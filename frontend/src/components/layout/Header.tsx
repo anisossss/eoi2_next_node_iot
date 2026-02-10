@@ -2,7 +2,7 @@
 
 import { useStore } from '@/store/useStore';
 import { cn, formatRelativeTime } from '@/lib/utils';
-import { LayoutGrid, TreeDeciduous, RefreshCw, Wifi, WifiOff } from 'lucide-react';
+import { LayoutGrid, TreeDeciduous, RefreshCw, Wifi, WifiOff, Radio, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
 import type { ViewMode } from '@/types';
 
@@ -12,7 +12,8 @@ interface HeaderProps {
 }
 
 export function Header({ onRefresh, isRefreshing }: HeaderProps) {
-  const { viewMode, setViewMode, isConnected, lastUpdateTime } = useStore();
+  const { viewMode, setViewMode, connectionStatus, lastUpdateTime } = useStore();
+  const isConnected = connectionStatus === 'connected';
 
   const viewModes: { value: ViewMode; label: string; icon: React.ReactNode }[] = [
     { value: 'grid', label: 'Grid View', icon: <LayoutGrid className="w-4 h-4" /> },
@@ -61,28 +62,43 @@ export function Header({ onRefresh, isRefreshing }: HeaderProps) {
 
           {/* Right - Status and Actions */}
           <div className="flex items-center space-x-4">
-            {/* Connection Status */}
+            {/* Connection Status — futuristic live/connecting/reconnecting */}
             <div className="hidden sm:flex items-center space-x-2">
-              <div
-                className={cn(
-                  'flex items-center space-x-1 px-3 py-1 rounded-full text-xs font-medium',
-                  isConnected
-                    ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400'
-                    : 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400'
-                )}
-              >
-                {isConnected ? (
-                  <>
-                    <Wifi className="w-3 h-3" />
-                    <span>Connected</span>
-                  </>
-                ) : (
-                  <>
-                    <WifiOff className="w-3 h-3" />
-                    <span>Disconnected</span>
-                  </>
-                )}
-              </div>
+              {connectionStatus === 'connected' && (
+                <div className="flex items-center space-x-1.5 px-3 py-1.5 rounded-full text-xs font-medium bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400 border border-green-200 dark:border-green-700/50">
+                  <span className="relative flex h-2 w-2">
+                    <span className="absolute inline-flex h-full w-full rounded-full bg-green-500 opacity-75 animate-ping" />
+                    <span className="relative inline-flex rounded-full h-2 w-2 bg-green-500 glow-dot" />
+                  </span>
+                  <Radio className="w-3 h-3" />
+                  <span>Live</span>
+                </div>
+              )}
+              {(connectionStatus === 'connecting' || connectionStatus === 'reconnecting') && (
+                <div className="flex items-center space-x-1.5 px-3 py-1.5 rounded-full text-xs font-medium bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400 border border-amber-200 dark:border-amber-700/50">
+                  <Loader2 className="w-3 h-3 animate-spin" />
+                  <span>
+                    {connectionStatus === 'connecting' ? 'Connecting' : 'Reconnecting'}
+                    <span className="inline-flex ml-0.5 gap-0.5">
+                      {[0, 1, 2].map((i) => (
+                        <span
+                          key={i}
+                          className="animate-connecting-dots opacity-40"
+                          style={{ animationDelay: `${i * 0.2}s` }}
+                        >
+                          .
+                        </span>
+                      ))}
+                    </span>
+                  </span>
+                </div>
+              )}
+              {connectionStatus === 'disconnected' && (
+                <div className="flex items-center space-x-1.5 px-3 py-1.5 rounded-full text-xs font-medium bg-slate-100 text-slate-600 dark:bg-slate-700 dark:text-slate-400 border border-slate-200 dark:border-slate-600">
+                  <WifiOff className="w-3 h-3" />
+                  <span>Polling</span>
+                </div>
+              )}
             </div>
 
             {/* Last Update Time */}

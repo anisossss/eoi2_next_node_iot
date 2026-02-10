@@ -6,6 +6,8 @@
   --foreground-rgb: 0, 0, 0;
   --background-start-rgb: 248, 250, 252;
   --background-end-rgb: 241, 245, 249;
+  --glow-primary: rgba(99, 102, 241, 0.4);
+  --scan-line: rgba(99, 102, 241, 0.08);
 }
 
 @media (prefers-color-scheme: dark) {
@@ -13,6 +15,8 @@
     --foreground-rgb: 255, 255, 255;
     --background-start-rgb: 15, 23, 42;
     --background-end-rgb: 30, 41, 59;
+    --glow-primary: rgba(99, 102, 241, 0.35);
+    --scan-line: rgba(99, 102, 241, 0.12);
   }
 }
 
@@ -25,6 +29,41 @@ body {
     )
     rgb(var(--background-start-rgb));
   min-height: 100vh;
+  position: relative;
+  overflow-x: hidden;
+}
+
+/* Futuristic data-stream overlay (optional, subtle) */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background: repeating-linear-gradient(
+    0deg,
+    transparent,
+    transparent 2px,
+    var(--scan-line) 2px,
+    var(--scan-line) 4px
+  );
+  pointer-events: none;
+  z-index: 0;
+  opacity: 0.5;
+}
+
+body::after {
+  content: '';
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 120px;
+  background: linear-gradient(
+    to bottom,
+    rgba(99, 102, 241, 0.06),
+    transparent
+  );
+  pointer-events: none;
+  z-index: 0;
 }
 
 /* Custom scrollbar */
@@ -95,20 +134,96 @@ body {
   box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
 }
 
-/* Real-time update pulse */
+/* Real-time update pulse — futuristic glow */
 .pulse-update {
-  animation: pulseUpdate 1s ease-out;
+  animation: pulseUpdate 1.2s ease-out;
 }
 
 @keyframes pulseUpdate {
   0% {
-    box-shadow: 0 0 0 0 rgba(99, 102, 241, 0.7);
+    box-shadow: 0 0 0 0 var(--glow-primary), 0 0 20px var(--glow-primary);
   }
-  70% {
-    box-shadow: 0 0 0 10px rgba(99, 102, 241, 0);
+  50% {
+    box-shadow: 0 0 0 8px rgba(99, 102, 241, 0), 0 0 30px var(--glow-primary);
   }
   100% {
+    box-shadow: 0 0 0 0 rgba(99, 102, 241, 0), 0 0 0 rgba(99, 102, 241, 0);
+  }
+}
+
+/* Data incoming — "signal received" glow */
+.data-incoming {
+  animation: dataIncoming 0.8s ease-out;
+}
+
+@keyframes dataIncoming {
+  0% {
+    opacity: 1;
+    filter: brightness(1.1);
+    box-shadow: 0 0 0 0 var(--glow-primary);
+  }
+  40% {
+    box-shadow: 0 0 15px 2px var(--glow-primary);
+  }
+  100% {
+    opacity: 1;
+    filter: brightness(1);
     box-shadow: 0 0 0 0 rgba(99, 102, 241, 0);
+  }
+}
+
+/* Connection status — live indicator */
+.glow-dot {
+  animation: glowDot 2s ease-in-out infinite;
+}
+
+@keyframes glowDot {
+  0%, 100% {
+    opacity: 1;
+    box-shadow: 0 0 6px 2px rgba(34, 197, 94, 0.8);
+  }
+  50% {
+    opacity: 0.85;
+    box-shadow: 0 0 12px 4px rgba(34, 197, 94, 0.6);
+  }
+}
+
+/* Connecting / Reconnecting — scanning line */
+.scan-line {
+  animation: scanLine 2s linear infinite;
+}
+
+@keyframes scanLine {
+  0% {
+    transform: translateY(-100%);
+    opacity: 0;
+  }
+  10% {
+    opacity: 1;
+  }
+  90% {
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(100vh);
+    opacity: 0;
+  }
+}
+
+/* Staggered entrance for grid cards — use with style={{ animationDelay: '...' }} */
+.stagger-fade-in {
+  opacity: 0;
+  animation: fadeInStagger 0.45s ease-out forwards;
+}
+
+@keyframes fadeInStagger {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
   }
 }
 

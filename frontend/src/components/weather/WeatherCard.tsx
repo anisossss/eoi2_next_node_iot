@@ -27,7 +27,7 @@ export function WeatherCard({ weather, className, isUpdating }: WeatherCardProps
   };
 
   return (
-    <Card className={cn('overflow-hidden', isUpdating && 'pulse-update', className)}>
+    <Card className={cn('overflow-hidden', isUpdating && 'pulse-update data-incoming', className)}>
       <div className="bg-gradient-to-br from-primary-500 to-primary-700 px-6 py-8 text-white">
         <div className="flex items-start justify-between">
           <div>

@@ -1,6 +1,7 @@
 /**
  * WebSocket Service
- * Handles real-time communication with the backend via Socket.IO
+ * Handles real-time communication with the backend via Socket.IO.
+ * Fails gracefully: resolves after timeout so UI can show "Disconnected" and use polling.
  */
 
 import { io, Socket } from 'socket.io-client';
@@ -8,54 +9,86 @@ import type { IoTReadingEvent, WeatherUpdateEvent } from '@/types';
 
 const WS_URL = process.env.NEXT_PUBLIC_WS_URL || 'http://localhost:3001';
 
+export type ConnectionStatus = 'idle' | 'connecting' | 'connected' | 'reconnecting' | 'disconnected';
+
 type EventHandler<T> = (data: T) => void;
 
 class WebSocketService {
   private socket: Socket | null = null;
   private reconnectAttempts = 0;
-  private maxReconnectAttempts = 5;
+  private maxReconnectAttempts = 8;
   private listeners: Map<string, Set<EventHandler<unknown>>> = new Map();
+  private connectionStatusListeners: Set<(status: ConnectionStatus) => void> = new Set();
+  private connectTimeoutMs = 8000;
+
+  private setStatus(status: ConnectionStatus): void {
+    this.connectionStatusListeners.forEach((cb) => {
+      try {
+        cb(status);
+      } catch (e) {
+        console.error('Connection status listener error:', e);
+      }
+    });
+  }
+
+  onConnectionStatus(callback: (status: ConnectionStatus) => void): () => void {
+    this.connectionStatusListeners.add(callback);
+    return () => this.connectionStatusListeners.delete(callback);
+  }
 
   /**
-   * Connect to WebSocket server
+   * Connect to WebSocket server. Resolves when connected, or after timeout so UI can show disconnected + poll.
    */
   connect(): Promise<void> {
-    return new Promise((resolve, reject) => {
+    return new Promise((resolve) => {
       if (this.socket?.connected) {
+        this.setStatus('connected');
         resolve();
         return;
       }
+
+      this.setStatus('connecting');
+      const timeoutId = setTimeout(() => {
+        if (!this.socket?.connected) {
+          this.setStatus('disconnected');
+          resolve();
+        }
+      }, this.connectTimeoutMs);
 
       this.socket = io(WS_URL, {
         transports: ['websocket', 'polling'],
         reconnection: true,
         reconnectionAttempts: this.maxReconnectAttempts,
-        reconnectionDelay: 1000,
-        reconnectionDelayMax: 5000,
+        reconnectionDelay: 1500,
+        reconnectionDelayMax: 8000,
         timeout: 10000,
       });
 
       this.socket.on('connect', () => {
-        console.log('WebSocket connected:', this.socket?.id);
+        clearTimeout(timeoutId);
         this.reconnectAttempts = 0;
         this.setupEventHandlers();
+        this.setStatus('connected');
         resolve();
       });
 
-      this.socket.on('connect_error', (error) => {
-        console.error('WebSocket connection error:', error);
+      this.socket.on('connect_error', () => {
         this.reconnectAttempts++;
+        this.setStatus(this.reconnectAttempts >= this.maxReconnectAttempts ? 'disconnected' : 'reconnecting');
         if (this.reconnectAttempts >= this.maxReconnectAttempts) {
-          reject(new Error('Failed to connect to WebSocket server'));
+          clearTimeout(timeoutId);
+          resolve();
         }
       });
 
       this.socket.on('disconnect', (reason) => {
-        console.log('WebSocket disconnected:', reason);
+        if (reason === 'io server disconnect') this.setStatus('disconnected');
+        else this.setStatus('reconnecting');
       });
 
-      this.socket.on('reconnect', (attemptNumber) => {
-        console.log('WebSocket reconnected after', attemptNumber, 'attempts');
+      this.socket.on('reconnect', () => {
+        this.reconnectAttempts = 0;
+        this.setStatus('connected');
       });
     });
   }

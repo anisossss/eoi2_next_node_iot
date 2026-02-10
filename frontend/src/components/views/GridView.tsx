@@ -66,22 +66,32 @@ export function GridView({ isUpdating }: GridViewProps) {
   };
 
   return (
-    <div className="space-y-6 animate-fade-in">
-      {/* Weather Section */}
-      <section>
+    <div className="space-y-6">
+      {/* Weather Section — dynamic data with incoming animation */}
+      <section className="animate-fade-in">
         <h2 className="text-lg font-semibold text-slate-900 dark:text-white mb-4 flex items-center space-x-2">
           <span>Current Weather</span>
+          {isUpdating && (
+            <span className="inline-flex items-center gap-1 text-xs font-normal text-primary-500 animate-pulse">
+              <span className="relative flex h-1.5 w-1.5">
+                <span className="absolute inline-flex h-full w-full rounded-full bg-primary-400 opacity-75 animate-ping" />
+                <span className="relative rounded-full h-1.5 w-1.5 bg-primary-500" />
+              </span>
+              Receiving
+            </span>
+          )}
           <span className="text-xs font-normal text-slate-500 dark:text-slate-400">
-            (Open-Meteo API)
+            (Live API)
           </span>
         </h2>
         {currentWeather ? (
           <WeatherCard weather={currentWeather} isUpdating={isUpdating} />
         ) : (
-          <Card className="p-8">
-            <div className="flex items-center justify-center text-slate-500 dark:text-slate-400">
-              <Activity className="w-5 h-5 mr-2 animate-pulse" />
-              <span>Loading weather data...</span>
+          <Card className="p-8 bg-grid-pattern bg-grid animate-pulse-slow border-primary-200 dark:border-primary-800/50">
+            <div className="flex flex-col items-center justify-center text-slate-500 dark:text-slate-400">
+              <Activity className="w-8 h-8 mb-3 animate-pulse text-primary-400" />
+              <span>Fetching weather data...</span>
+              <span className="text-xs mt-1 opacity-80">API may be reconnecting</span>
             </div>
           </Card>
         )}
@@ -99,14 +109,20 @@ export function GridView({ isUpdating }: GridViewProps) {
 
         {latestReadings.length > 0 ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {latestReadings.map((reading) => (
-              <SensorCard key={reading.id} reading={reading} isUpdating={isUpdating} />
+            {latestReadings.map((reading, i) => (
+              <div
+                key={reading.id}
+                className="stagger-fade-in"
+                style={{ animationDelay: `${i * 0.06}s` }}
+              >
+                <SensorCard reading={reading} isUpdating={isUpdating} />
+              </div>
             ))}
           </div>
         ) : (
-          <Card className="p-8">
+          <Card className="p-8 bg-grid-pattern bg-grid border-slate-200 dark:border-slate-700">
             <div className="flex flex-col items-center justify-center text-slate-500 dark:text-slate-400">
-              <Radio className="w-8 h-8 mb-2 opacity-50" />
+              <Radio className="w-8 h-8 mb-2 opacity-50 animate-pulse" />
               <p>No sensor readings available</p>
               <p className="text-xs mt-1">Waiting for IoT data...</p>
             </div>
@@ -163,7 +179,7 @@ function SensorCard({ reading, isUpdating }: { reading: IoTReading; isUpdating?:
   const isRecent = new Date().getTime() - new Date(reading.timestamp).getTime() < 60000;
 
   return (
-    <Card className={cn('grid-card', isRecent && isUpdating && 'pulse-update')}>
+    <Card className={cn('grid-card', isRecent && isUpdating && 'pulse-update data-incoming')}>
       <CardHeader className="pb-2">
         <div className="flex items-start justify-between">
           <div>
