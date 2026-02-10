@@ -63,7 +63,7 @@ services:
     container_name: csir-backend
     restart: unless-stopped
     ports:
-      - "3001:3001"
+      - "3005:3001"
     environment:
       NODE_ENV: production
       PORT: 3001
