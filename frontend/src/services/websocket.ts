@@ -7,7 +7,13 @@
 import { io, Socket } from 'socket.io-client';
 import type { IoTReadingEvent, WeatherUpdateEvent } from '@/types';
 
-const WS_URL = process.env.NEXT_PUBLIC_WS_URL || 'http://localhost:3001';
+// Use same origin when in browser so production (https://iot.ainexim-eoi.co.za) uses wss:// automatically
+function getWsUrl(): string {
+  if (typeof window !== 'undefined') {
+    return process.env.NEXT_PUBLIC_WS_URL || `${window.location.protocol === 'https:' ? 'https' : 'http'}://${window.location.host}`;
+  }
+  return process.env.NEXT_PUBLIC_WS_URL || 'http://localhost:3001';
+}
 
 export type ConnectionStatus = 'idle' | 'connecting' | 'connected' | 'reconnecting' | 'disconnected';
 
@@ -55,7 +61,7 @@ class WebSocketService {
         }
       }, this.connectTimeoutMs);
 
-      this.socket = io(WS_URL, {
+      this.socket = io(getWsUrl(), {
         transports: ['websocket', 'polling'],
         reconnection: true,
         reconnectionAttempts: this.maxReconnectAttempts,
