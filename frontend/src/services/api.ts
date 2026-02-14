@@ -14,7 +14,13 @@ import type {
   HealthStatus
 } from '@/types';
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001/api';
+/** Use same origin in browser so production (https://iot.ainexim-eoi.co.za) hits /api on same host */
+function getApiBaseUrl(): string {
+  if (typeof window !== 'undefined') {
+    return process.env.NEXT_PUBLIC_API_URL || `${window.location.origin}/api`;
+  }
+  return process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001/api';
+}
 
 /** Retry on 502/503/gateway errors; return null on final failure for graceful fallback */
 async function withRetry<T>(
@@ -43,16 +49,19 @@ async function withRetry<T>(
 
 // Create axios instance with default configuration
 const apiClient: AxiosInstance = axios.create({
-  baseURL: API_BASE_URL,
+  baseURL: getApiBaseUrl(),
   timeout: 20000,
   headers: {
     'Content-Type': 'application/json',
   },
 });
 
-// Request interceptor for adding auth token
+// Request interceptor: use current origin in browser (so production hits same host)
 apiClient.interceptors.request.use(
   (config) => {
+    if (typeof window !== 'undefined') {
+      config.baseURL = getApiBaseUrl();
+    }
     const token = typeof window !== 'undefined' ? localStorage.getItem('authToken') : null;
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
