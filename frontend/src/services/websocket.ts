@@ -7,10 +7,15 @@
 import { io, Socket } from 'socket.io-client';
 import type { IoTReadingEvent, WeatherUpdateEvent } from '@/types';
 
-// Use same origin when in browser so production (https://iot.ainexim-eoi.co.za) uses wss:// automatically
+// In browser: use current origin so production always gets wss on same host. Localhost can override via env.
 function getWsUrl(): string {
   if (typeof window !== 'undefined') {
-    return process.env.NEXT_PUBLIC_WS_URL || `${window.location.protocol === 'https:' ? 'https' : 'http'}://${window.location.host}`;
+    const origin = `${window.location.protocol === 'https:' ? 'https' : 'http'}://${window.location.host}`;
+    // Only allow env override on localhost (for dev with backend on another port)
+    if (window.location.hostname === 'localhost' && process.env.NEXT_PUBLIC_WS_URL) {
+      return process.env.NEXT_PUBLIC_WS_URL;
+    }
+    return origin;
   }
   return process.env.NEXT_PUBLIC_WS_URL || 'http://localhost:3001';
 }
